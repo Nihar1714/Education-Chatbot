@@ -13,7 +13,7 @@ DB_PASSWORD = "Nihar"
 DB_NAME = "education_chatbot"
 
 # Initialize the bot and user management system
-api_key = "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"
+api_key = "gsk_MEoc7rPQ6KhyADQsga1AWGdyb3FYj1JtuGRmbHnpDWuU9wYAqpZ"
 bot = EducationBot(api_key, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
 user_manager = User(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
 
