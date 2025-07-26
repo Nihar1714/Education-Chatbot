@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDBot - AI Tutor Chat</title>
+    
+    <!-- External Styles -->
+    <!-- Highlight.js Library for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Internal CSS -->
+    <style>
+        /* Light & Dark Mode Variables */
+        :root {
+            --bg-color: #f4f4f4;      /* Soft warm gray instead of pure white */
+            --text-color: #2d2d2d;    /* Dark gray text for better contrast */
+            --chat-bg: #ffffff;       /* Chat container with a very light gray background */
+            --chat-border: #cccccc;   /* Subtle border color */
+            --bot-bg: #e8f0fe;        /* Light blue background for bot messages */
+            --user-bg: #007bff;       /* Blue background for user messages */
+            --user-text: white;       /* White text for user messages */
+            --button-bg: #0056b3;     /* Deep blue buttons */
+            --button-hover: #003d80;  /* Darker blue on hover */
+        }
+
+        /* 🔹 Dark Mode with a Softer Canvas */
+        body.dark-mode {
+            --bg-color: #121212;      /* Charcoal black (not pure black) */
+            --text-color: #e0e0e0;    /* Light gray for good contrast */
+            --chat-bg: #1c1c1c;       /* Dark but not too harsh */
+            --chat-border: #292929;   /* Subtle border color */
+            --bot-bg: #24292e;        /* Slightly lighter dark for bot messages */
+            --user-bg: #1f6feb;       /* Bright blue for user messages */
+            --user-text: white;       /* White text for user messages */
+            --button-bg: #4a90e2;   /* Soft blue button */
+            --button-hover: #357abd;/* Slightly darker hover effect */
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Chatbot Container */
+        .chat-container {
+            width: 85%;
+            max-width: 1000px;
+            height: 95vh;
+            background: var(--chat-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: var(--button-bg);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* Chat History */
+        .chat-history {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;  
+            max-height: calc(95vh - 80px);
+        }
+
+        /* Chat Messages */
+        .message {
+            max-width: 75%;
+            padding: 14px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+
+        .user-message {
+            background: var(--user-bg);
+            color: var(--user-text);
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot-message {
+            background: var(--bot-bg);
+            color: var(--text-color);
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        /* Chat Input Section */
+        .chat-input {
+            display: flex;
+            padding: 12px;
+            background: var(--chat-bg);
+            border-top: 1px solid var(--chat-border);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .chat-input button {
+            margin-left: 12px;
+            padding: 14px 18px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .chat-input button:hover {
+            background: var(--button-hover);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--button-hover);
+        }
+
+        /* 🔹 Increased spacing for subtopics and bullet points */
+        h1, h2, h3, strong {
+            display: block;
+            font-weight: bold;
+        }
+
+        /* Increased gap for topics */
+        h1 {
+            margin-top: 35px;
+            margin-bottom: 25px;
+            font-size: 26px;
+        }
+
+        /* Increased gap for subtopics */
+        h2 {
+            margin-top: 32px;
+            margin-bottom: 25px;
+            font-size: 22px;
+            padding-left: 15px; /* Left Padding */
+        }
+
+        h3 {
+            margin-top: 27px;
+            margin-bottom: 22px;
+            font-size: 20px;
+            padding-left: 25px; /* Increased Left Padding */
+        }
+
+        /* Bullet points spacing */
+        ul {
+            margin-top: 10px;   
+            margin-bottom: 18px;
+            padding-left: 35px; /* Left Padding for Bullet Points */
+        }
+
+        li {
+            margin-bottom: 10px; /* Increased Spacing */
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 95%;
+                height: 100vh;
+            }
+            .message {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle">🌙 Dark Mode</button>
+
+    <div class="chat-container">
+        <div class="chat-header">Chat with EDBot</div>
+        <div class="chat-history" id="chatHistory"></div>
+        <div class="chat-input">
+            <input type="text" id="userPrompt" placeholder="Ask me anything..." required />
+            <button type="submit" id="sendMessage">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const chatHistory = document.getElementById("chatHistory");
+            const userInput = document.getElementById("userPrompt");
+            const sendMessageButton = document.getElementById("sendMessage");
+            const themeToggle = document.getElementById("themeToggle");
+
+            // ✅ Function to format messages with bullet points, bold text, and emojis
+            function formatMessage(message) {
+                // Convert `-` and `✔` bullet points to styled list items
+                message = message.replace(/^- (.+)/gm, "✔ <strong>$1</strong>");
+                message = message.replace(/✔ (.+)/gm, "✔ <strong>$1</strong>");
+
+                // Auto-bold key terms (e.g., **bold** → <strong>bold</strong>)
+                message = message.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+                // Convert emojis like `:bulb:` to actual icons (Example: 💡)
+                const emojiMap = {
+                    ":bulb:": "💡", ":rocket:": "🚀", ":warning:": "⚠️",
+                    ":fire:": "🔥", ":star:": "⭐", ":robot:": "🤖",
+                    ":idea:": "💡", ":check:": "✅", ":error:": "❌",
+                    ":success:": "🎯", ":tip:": "📝", ":info:": "ℹ️",
+                    ":question:": "❓", ":light:": "💡", ":update:": "🔄"
+                };
+
+                // ✅ Fix: Ensure emojis are correctly replaced in the message
+                message = message.replace(/:(\w+):/g, (match, emoji) => emojiMap[match] || match);
+
+                return message;
+            }
+
+            // ✅ Function to append user and bot messages
+            function appendMessage(role, message) {
+                const msgDiv = document.createElement("div");
+                msgDiv.classList.add("message", role === "user" ? "user-message" : "bot-message");
+
+                // Format message with emojis, bold text, and bullet points
+                msgDiv.innerHTML = formatMessage(message);
+
+                chatHistory.appendChild(msgDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                // ✅ Apply syntax highlighting for code blocks
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+
+            // ✅ Function to send user input to the bot and get a response
+            async function sendMessage() {
+                const userPrompt = userInput.value.trim();
+                if (!userPrompt) return;
+
+                appendMessage("user", userPrompt);
+                userInput.value = "";
+
+                try {
+                    const response = await fetch("/ask", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ user_prompt: userPrompt }),
+                    });
+
+                    const data = await response.json();
+                    appendMessage("bot", data.response);
+                } catch (error) {
+                    appendMessage("bot", "<span style='color: red;'>⚠️ Error: Unable to fetch response.</span>");
+                }
+            }
+
+            // ✅ Event listeners for sending messages
+            sendMessageButton.addEventListener("click", sendMessage);
+            userInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") sendMessage();
+            });
+
+            // ✅ Dark Mode Toggle with Local Storage
+            function setTheme(isDark) {
+                document.body.classList.toggle("dark-mode", isDark);
+                themeToggle.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+                localStorage.setItem("darkMode", isDark);
+            }
+
+            themeToggle.addEventListener("click", () => {
+                const isDark = !document.body.classList.contains("dark-mode");
+                setTheme(isDark);
+            });
+
+            // ✅ Load Theme from Local Storage
+            setTheme(localStorage.getItem("darkMode") === "true");
+        });
+    </script>
+</body>
+</html>
